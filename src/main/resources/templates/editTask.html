@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+</head>
+<body>
+
+    <div class="modal-header" style="color: black;">
+        <span style="text-align: center; margin: auto 0;" class="modal-title" id="exampleModalLabel" th:text="${task.titleTask}"></span>
+            <a  class="btn btn-primary" style="margin: auto 0; " data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                Edit
+            </a>
+        <button style="margin: auto 0" type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span id="close" aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <form th:action="@{'/saveTask/' + ${task.idTask}}" method="post">
+            <div class="form-group">
+                <div class="collapse" id="collapseExample">
+                    <div class="card card-body">
+                        <input type="text" class="form-control" name="titleTask" th:value="${task.titleTask}">
+                        <input type="text" class="form-control" name="descriptionTask" th:value="${task.descriptionTask}">
+                        <input type="submit" class="btn btn-primary" value="Save"/>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="mx-3">
+        <h3 style="color: black;">Comments</h3>
+        <form th:action="@{'/addComment/' + ${task.idTask}}" method="post">
+            <textarea class="form-control" rows="3" name="comment" placeholder="Enter Your Comment"></textarea>
+            <input type="submit" class="btn btn-primary" value="Add Comment"/>
+        </form>
+        <th:block th:each="comment : ${comments}">
+            <div class="media">
+                <div class="media-body" style="color: black;">
+                    <h5 class="mt-0">Media heading</h5>
+                    <span th:text="${comment.textComment}"></span>
+                    <span th:text="${comment.dateComment}"></span>
+                    <span th:text="${comment.user.getUsername()}"></span>
+                </div>
+            </div>
+        </th:block>
+    </div>
+    <div class="modal-footer">
+
+    </div>
+    <script>
+        $('#close').click(function() {
+            location.reload();
+        });
+    </script>
+</body>
+</html>
