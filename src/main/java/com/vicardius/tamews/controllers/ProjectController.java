@@ -70,15 +70,17 @@ public class ProjectController {
     @GetMapping("/projects/p/{projectId}")
     public String deleteProject(@PathVariable Long projectId) {
         Project project = projectRepository.findByProjectId(projectId);
+        User user = userRepository.findByUsername(getIdUser());
+        Set<Project> projects = user.getProjects();
+        projects.remove(project);
+
         Iterable<TaskBar> taskBars = taskBarRepository.findByProject(project);
         Iterable<Task> tasks = taskRepository.findByProject(project);
         for (Task task: tasks) {
             taskRepository.deleteById(task.getIdTask());
-            System.out.println(task.getIdTask());
         }
         for (TaskBar taskBar: taskBars) {
             taskBarRepository.deleteById(taskBar.getIdTaskBar());
-            System.out.println(taskBar.getIdTaskBar());
         }
         projectRepository.deleteById(projectId);
         return "redirect:/projects";
@@ -103,9 +105,12 @@ public class ProjectController {
 
     @GetMapping("/findTaskBar/{idTaskBar}")
     @ResponseBody
-    public TaskBar findTaskBar(@PathVariable Long idTaskBar){
+    public List findTaskBar(@PathVariable Long idTaskBar){
+        List list = new ArrayList();
         TaskBar taskBar = taskBarRepository.findByIdTaskBar(idTaskBar);
-        return taskBar;
+        list.add(taskBar.getIdTaskBar());
+        list.add(taskBar.getTitleTaskBar());
+        return list;
     }
 
     @PostMapping("/saveTaskBar")

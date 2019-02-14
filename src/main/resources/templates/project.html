@@ -120,9 +120,9 @@
             $('.eBtn').on('click', function (event) {
                 event.preventDefault();
                 var href = $(this).attr('href');
-                $.get(href, function (taskBar) {
-                    $('.formTaskBar #idTaskBar').val(taskBar.idTaskBar);
-                    $('.formTaskBar #titleTaskBar').val(taskBar.titleTaskBar);
+                $.get(href, function (list) {
+                    $('.formTaskBar #idTaskBar').val(list[0]);
+                    $('.formTaskBar #titleTaskBar').val(list[1]);
                 });
                 $('.formTaskBar #exampleModal').modal();
             })
