@@ -1,8 +1,10 @@
 package com.vicardius.tamews.controllers;
 
+import com.vicardius.tamews.models.Comment;
 import com.vicardius.tamews.models.Project;
 import com.vicardius.tamews.models.Task;
 import com.vicardius.tamews.models.TaskBar;
+import com.vicardius.tamews.repositories.CommentRepository;
 import com.vicardius.tamews.repositories.ProjectRepository;
 import com.vicardius.tamews.repositories.TaskBarRepository;
 import com.vicardius.tamews.repositories.TaskRepository;
@@ -24,6 +26,9 @@ public class TaskBarController {
 
     @Autowired
     private TaskRepository taskRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     @PostMapping("/projects/{projectId}")
     public String addTaskBar(@RequestParam(name = "titleTaskBar", required = false, defaultValue = "") String titleTaskBar,
@@ -50,8 +55,11 @@ public class TaskBarController {
         TaskBar taskbar = taskBarRepository.findByIdTaskBar(idTaskBar);
         Iterable<Task> allTasksInTaskBar = taskRepository.findByTaskBar(taskbar);
         for (Task task : allTasksInTaskBar) {
-            Long taskId = task.getIdTask();
-            taskRepository.deleteById(taskId);
+            Iterable<Comment> allCommentsInTask = commentRepository.findByTask(task);
+            for (Comment comment : allCommentsInTask) {
+                commentRepository.deleteById(comment.getIdComment());
+            }
+            taskRepository.deleteById(task.getIdTask());
         }
         taskBarRepository.deleteById(idTaskBar);
         return "redirect:/projects/{projectId}";

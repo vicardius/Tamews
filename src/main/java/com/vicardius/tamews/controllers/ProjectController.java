@@ -75,15 +75,31 @@ public class ProjectController {
         projects.remove(project);
 
         Iterable<TaskBar> taskBars = taskBarRepository.findByProject(project);
-        Iterable<Task> tasks = taskRepository.findByProject(project);
-        for (Task task: tasks) {
-            taskRepository.deleteById(task.getIdTask());
-        }
-        for (TaskBar taskBar: taskBars) {
+        for (TaskBar taskBar : taskBars) {
+            Iterable<Task> allTasksInTaskBar = taskRepository.findByTaskBar(taskBar);
+            for (Task task : allTasksInTaskBar) {
+                Iterable<Comment> allCommentsInTask = commentRepository.findByTask(task);
+                for (Comment comment : allCommentsInTask) {
+                    commentRepository.deleteById(comment.getIdComment());
+                }
+                taskRepository.deleteById(task.getIdTask());
+            }
             taskBarRepository.deleteById(taskBar.getIdTaskBar());
         }
         projectRepository.deleteById(projectId);
         return "redirect:/projects";
+    }
+
+    @GetMapping("/projects/pe/{projectId}")
+    @ResponseBody
+    public List editProject(@PathVariable Long projectId) {
+        List list = new ArrayList();
+        Project project = projectRepository.findByProjectId(projectId);
+        list.add(project.getProjectId());
+        list.add(project.getProjectTitle());
+        list.add(project.getProjectDescription());
+        list.add(project.getProjectStatus());
+        return list;
     }
 
     @PostMapping(value = {"/", "projects"})
@@ -121,6 +137,16 @@ public class ProjectController {
         Project project = taskBar.getProject();
         Long idProject = project.getProjectId();
         return "redirect:/projects/" + idProject;
+    }
+
+    @PostMapping("/saveProject")
+    public String saveProject(@RequestParam("projectId") Long projectId, @RequestParam("projectTitle") String projectTitle, @RequestParam("projectDescription") String projectDescription, @RequestParam("projectStatus") String projectStatus){
+        Project project = projectRepository.findByProjectId(projectId);
+        project.setProjectTitle(projectTitle);
+        project.setProjectDescription(projectDescription);
+        project.setProjectStatus(projectStatus);
+        projectRepository.save(project);
+        return "redirect:/projects/";
     }
 
     @GetMapping("/editTask/{idTask}")
