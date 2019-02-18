@@ -172,7 +172,6 @@ public class ProjectController {
     @GetMapping(value = "/drag-task")
     @ResponseBody
     public void dragTask(@RequestParam("idTask") Long idTask) {
-        System.out.println("idTask");
         System.out.println(idTask);
     }
 
