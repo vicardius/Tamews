@@ -57,10 +57,10 @@
             <div class="card-body">
                 <ul id="sortable1" class="connectedSortable">
                     <tr th:each="task : ${taskBarWithTasks.value}">
-                        <li style="list-style: none;" class="draggable-task">
+                        <li style="list-style: none;" class="draggable-task" th:value="${task.idTask}">
                             <div class="card-text p-2 mb-2" style="background: #28a745; border-radius: 4px;">
                                 <span th:text="${task.titleTask}"></span><br>
-                                <input type="hidden" th:value="${task.idTask}" name="idTask">
+                                <input type="hidden" name="idTask">
                                 <a class="btn btn-danger"
                                    th:href="@{'/projects/' + ${foundProject.projectId} + '/t/' + ${task.idTask}}">X</a>
                                 <a class="btn btn-primary" href="editTask.html" data-target="#theModal"
@@ -155,13 +155,11 @@
 
     <script>
         $(document).ready(() => {
-            $('.draggable-task').on('click', () => {
-                var $data = $("[name='idTask']").val();
+            $('.draggable-task').on('click', function () {
+                var $data = $(this).val();
                 $.ajax({
                     type: 'GET',
                     url: '/drag-task',
-                    // data: ({idTask : $('#idTask').val()}),
-                    // data: ({idTask : $("[name='idTask']").val()}),
                     data: ({idTask : $data}),
                 });
             })
