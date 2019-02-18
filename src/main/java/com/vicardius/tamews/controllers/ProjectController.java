@@ -169,4 +169,11 @@ public class ProjectController {
         return "redirect:/projects/" + idProject;
     }
 
+    @GetMapping(value = "/drag-task")
+    @ResponseBody
+    public void dragTask(@RequestParam("idTask") Long idTask) {
+        System.out.println("idTask");
+        System.out.println(idTask);
+    }
+
 }
