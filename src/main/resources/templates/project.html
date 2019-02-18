@@ -57,10 +57,10 @@
             <div class="card-body">
                 <ul id="sortable1" class="connectedSortable">
                     <tr th:each="task : ${taskBarWithTasks.value}">
-                        <li style="list-style: none;" id="draggable-task">
+                        <li style="list-style: none;" class="draggable-task">
                             <div class="card-text p-2 mb-2" style="background: #28a745; border-radius: 4px;">
                                 <span th:text="${task.titleTask}"></span><br>
-                                <input type="hidden" th:value="${task.idTask}" name="idTask" id="idTask">
+                                <input type="hidden" th:value="${task.idTask}" name="idTask">
                                 <a class="btn btn-danger"
                                    th:href="@{'/projects/' + ${foundProject.projectId} + '/t/' + ${task.idTask}}">X</a>
                                 <a class="btn btn-primary" href="editTask.html" data-target="#theModal"
@@ -152,18 +152,21 @@
             }).disableSelection();
         } );
     </script>
+
     <script>
         $(document).ready(() => {
-            $('#draggable-task').on('click', () => {
+            $('.draggable-task').on('click', () => {
+                var $data = $("[name='idTask']").val();
                 $.ajax({
                     type: 'GET',
                     url: '/drag-task',
-                    data: ({idTask : $('#idTask').val()}),
+                    // data: ({idTask : $('#idTask').val()}),
+                    // data: ({idTask : $("[name='idTask']").val()}),
+                    data: ({idTask : $data}),
                 });
             })
         });
     </script>
-    <script>123</script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
 </body>
 </html>
