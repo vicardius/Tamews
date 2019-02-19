@@ -171,8 +171,11 @@ public class ProjectController {
 
     @GetMapping(value = "/drag-task")
     @ResponseBody
-    public void dragTask(@RequestParam("idTask") Long idTask) {
-        System.out.println(idTask);
+    public void dragTask(@RequestParam("idTask") Long idTask, @RequestParam("idTaskBar") Long idTaskBar) {
+        Task task = taskRepository.findByIdTask(idTask);
+        TaskBar taskBar = taskBarRepository.findByIdTaskBar(idTaskBar);
+        task.setTaskBar(taskBar);
+        taskRepository.save(task);
     }
 
 }

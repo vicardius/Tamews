@@ -55,7 +55,7 @@
 
 
             <div class="card-body">
-                <ul id="sortable1" class="connectedSortable">
+                <ul id="sortable1" class="connectedSortable" th:value="${taskBarWithTasks.key.idTaskBar}">
                     <tr th:each="task : ${taskBarWithTasks.value}">
                         <li style="list-style: none;" class="draggable-task" th:value="${task.idTask}">
                             <div class="card-text p-2 mb-2" style="background: #28a745; border-radius: 4px;">
@@ -146,24 +146,19 @@
         });
     </script>
     <script>
-        $( function() {
-            $( "#sortable1, #sortable2" ).sortable({
+        $(document).ready(function() {
+            $("#sortable1, #sortable2").sortable({
                 connectWith: ".connectedSortable",
+                receive : function (event, ui) {
+                    var $idTask = $(ui.item).attr('value');
+                    var $idTaskBar = $(this).attr('value');
+                    $.ajax({
+                        type: 'GET',
+                        url: '/drag-task',
+                        data: ({idTask : $idTask, idTaskBar : $idTaskBar}),
+                    });
+                }
             }).disableSelection();
-        } );
-    </script>
-
-    <script>
-        $(document).ready(() => {
-            $('.draggable-task').mouseup(function() {
-                var $data = $(this).val();
-                $.ajax({
-                    type: 'GET',
-                    url: '/drag-task',
-                    data: ({idTask : $data}),
-                });
-                console.log($data);
-            })
         });
     </script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
