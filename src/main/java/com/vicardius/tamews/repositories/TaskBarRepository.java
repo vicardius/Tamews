@@ -12,5 +12,4 @@ public interface TaskBarRepository extends CrudRepository<TaskBar, Long> {
 
     TaskBar findByIdTaskBar(Long idTaskBar);
 
-    //Iterable<TaskBar> findByProject(Long idProject);
 }

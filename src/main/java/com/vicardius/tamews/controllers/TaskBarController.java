@@ -32,7 +32,6 @@ public class TaskBarController {
 
     @PostMapping("/projects/{projectId}")
     public String addTaskBar(@RequestParam(name = "titleTaskBar", required = false, defaultValue = "") String titleTaskBar,
-                             @RequestParam(name = "positionTaskBar", required = false, defaultValue = "") Integer positionTaskBar,
                              @PathVariable Long projectId,
                              @RequestParam(name = "titleTask", required = false, defaultValue = "") String titleTask,
                              @RequestParam(name = "descriptionTask", required = false, defaultValue = "") String descriptionTask,
@@ -44,7 +43,14 @@ public class TaskBarController {
             taskRepository.save(task);
         } else {
             Project project = projectRepository.findByProjectId(projectId);
-            TaskBar taskBar = new TaskBar(titleTaskBar, positionTaskBar, project);
+            Iterable<TaskBar> taskBars = taskBarRepository.findByProject(project);
+            int position = 0;
+            for (TaskBar taskBar: taskBars) {
+                if(taskBar.getPositionTaskBar() > position) {
+                    position = taskBar.getPositionTaskBar();
+                }
+            }
+            TaskBar taskBar = new TaskBar(titleTaskBar, position + 1, project);
             taskBarRepository.save(taskBar);
         }
         return "redirect:/projects/{projectId}";

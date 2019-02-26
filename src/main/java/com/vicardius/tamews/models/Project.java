@@ -1,5 +1,8 @@
 package com.vicardius.tamews.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -16,6 +19,7 @@ public class Project {
     private String projectStatus;
 
     @ManyToMany(mappedBy = "projects")
+    @JsonIgnoreProperties("projects")
     private Set<User> users = new HashSet<>();
 
     public Project() {

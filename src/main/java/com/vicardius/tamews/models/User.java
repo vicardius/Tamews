@@ -1,5 +1,6 @@
 package com.vicardius.tamews.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -33,6 +34,8 @@ public class User implements UserDetails {
             joinColumns = { @JoinColumn(name = "user_id") },
             inverseJoinColumns = { @JoinColumn(name = "project_id") }
     )
+
+    @JsonIgnoreProperties("users")
     Set<Project> projects = new HashSet<>();
 
     public Set<Project> getProjects() {

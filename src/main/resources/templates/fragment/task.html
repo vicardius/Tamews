@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <meta charset="UTF-8">
+    <title>Task</title>
+</head>
+<body>
+
+
+    <div th:fragment="taskFragment" class="modal fade" id="openTaskModal" tabindex="-1" role="dialog" aria-labelledby="openTaskModalLabel" aria-hidden="true" style="color: black;">
+        <form th:action="@{'/saveTask'}" method="post">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="openTaskModalLabel" th:text="${task.titleTask}"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="form-group">
+                                <!--<input type="hidden" class="form-control" id="idTask" name="idTask" value="">-->
+                                <!--<input type="text" class="form-control" id="titleTask" name="titleTask" value="">-->
+                                <div th:replace="fragment/comment.html :: comment"></div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="submit" class="btn btn-success" value="Save">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+</body>
+</html>
