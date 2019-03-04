@@ -46,12 +46,8 @@ public class ProjectController {
     public String addNewProject(@RequestParam String projectTitle, @RequestParam String projectDescription, @RequestParam String projectStatus){
         Project project = new Project(projectTitle, projectDescription, projectStatus);
         User user = userRepository.findByUsername(getIdUser());
-        Set<User> users = project.getUsers();
-        users.add(user);
-        project.setUsers(users);
-        Set<Project> projects = user.getProjects();
-        projects.add(project);
-        user.setProjects(projects);
+        project.getUsers().add(user);
+        user.getProjects().add(project);
         projectRepository.save(project);
         userRepository.save(user);
         return "redirect:/projects";
@@ -69,23 +65,36 @@ public class ProjectController {
 
     @GetMapping("/projects/{projectId}")
     public String showProject(Model model, @PathVariable Long projectId) {
-        Project project = projectRepository.findByProjectId(projectId);
-        List<TaskBar> taskBars = taskBarRepository.findByProject(project);
-        Map<TaskBar, List<Task>> tasksForTaskBar = new TreeMap<>(new Comparator<TaskBar>() {
-            @Override
-            public int compare(TaskBar o1, TaskBar o2) {
-                return o1.getPositionTaskBar() - o2.getPositionTaskBar();
-            }
-        });
-        for (TaskBar taskBar : taskBars) {
-            List<Task> tasksInBar = taskRepository.findByTaskBar(taskBar);
-            tasksForTaskBar.put(taskBar, tasksInBar);
+        User user = userRepository.findByUsername(getIdUser());
+        Project projectCurrent = projectRepository.findByProjectId(projectId);
+        if (user.getProjects().contains(projectCurrent)) {
+            Project project = projectRepository.findByProjectId(projectId);
+            Iterable<User> usersToProject = userRepository.findAll();
+            List<TaskBar> taskBars = taskBarRepository.findByProject(project);
+            Map<TaskBar, List<Task>> tasksForTaskBar = new TreeMap<>(new Comparator<TaskBar>() {
+                @Override
+                public int compare(TaskBar o1, TaskBar o2) {
+                    return o1.getPositionTaskBar() - o2.getPositionTaskBar();
+                }
+            });
+            for (TaskBar taskBar : taskBars) {
+                List<Task> tasksInBar = taskRepository.findByTaskBar(taskBar);
+                Collections.sort(tasksInBar, new Comparator<Task>() {
+                    @Override
+                    public int compare(Task t1, Task t2) {
+                        return t1.getInTaskbarPositionTask() - t2.getInTaskbarPositionTask();
+                    }
+                });
+                tasksForTaskBar.put(taskBar, tasksInBar);
 
+            }
+            model.addAttribute("foundProject", project);
+            model.addAttribute("taskBarsWithTasks", tasksForTaskBar);
+            model.addAttribute("taskBar", taskBars);
+            model.addAttribute("usersToProject", usersToProject);
+            return "project";
         }
-        model.addAttribute("foundProject", project);
-        model.addAttribute("taskBarsWithTasks", tasksForTaskBar);
-        model.addAttribute("taskBar", taskBars);
-        return "project";
+        return "error";
     }
 
     @GetMapping("/projects/p/{projectId}")
@@ -156,16 +165,16 @@ public class ProjectController {
         return list;
     }
 
-//    @PostMapping("/saveTask/{idTask}")
-//    public String saveTask(@PathVariable Long idTask, @RequestParam("titleTask") String titleTask, @RequestParam("descriptionTask") String descriptionTask){
-//        Task task = taskRepository.findByIdTask(idTask);
-//        task.setTitleTask(titleTask);
-//        task.setDescriptionTask(descriptionTask);
-//        taskRepository.save(task);
-//        Project project = task.getProject();
-//        Long idProject = project.getProjectId();
-//        return "redirect:/projects/" + idProject;
-//    }
+    @PostMapping("/saveTask/{idTask}")
+    public String saveTask(@PathVariable Long idTask, @RequestParam("titleTask") String titleTask, @RequestParam("descriptionTask") String descriptionTask){
+        Task task = taskRepository.findByIdTask(idTask);
+        task.setTitleTask(titleTask);
+        task.setDescriptionTask(descriptionTask);
+        taskRepository.save(task);
+        Project project = task.getProject();
+        Long idProject = project.getProjectId();
+        return "redirect:/projects/" + idProject;
+    }
 
     @GetMapping(value = "/task/{idTask}")
     public String openTask(@PathVariable("idTask") Long idTask, Model model) {
@@ -178,10 +187,35 @@ public class ProjectController {
 
     @GetMapping(value = "/drag-task")
     @ResponseBody
-    public void dragTask(@RequestParam("idTask") Long idTask, @RequestParam("idTaskBar") Long idTaskBar) {
+    public void dragTask(@RequestParam("idTask") Long idTask, @RequestParam("idTaskBar") Long idTaskBar, @RequestParam(value="idTasksChanged[]") Long[] idTasksChanged) {
+        for (int i = 0; i < idTasksChanged.length; i++) {
+            Task task = taskRepository.findByIdTask(idTasksChanged[i]);
+            task.setInTaskbarPositionTask(i + 1);
+        }
         Task task = taskRepository.findByIdTask(idTask);
         TaskBar taskBar = taskBarRepository.findByIdTaskBar(idTaskBar);
         task.setTaskBar(taskBar);
         taskRepository.save(task);
     }
+
+    @GetMapping(value = "/addUsersToProject")
+    @ResponseBody
+    public void addUsersToProject(@RequestParam(value="addedUsersToProject[]") Long[] addedUsersToProject, @RequestParam("idProject") Long idProject) {
+        Project project = projectRepository.findByProjectId(idProject);
+        Iterable<User> users = userRepository.findByProjects(project);
+        project.getUsers().clear();
+
+        for (User user : users) {
+            user.getProjects().remove(project);
+        }
+
+        for (int i = 0; i < addedUsersToProject.length; i++) {
+            User user = userRepository.findByIdUser(addedUsersToProject[i]);
+            project.getUsers().add(user);
+            user.getProjects().add(project);
+            projectRepository.save(project);
+            userRepository.save(user);
+        }
+    }
+
 }

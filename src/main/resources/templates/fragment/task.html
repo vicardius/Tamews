@@ -8,30 +8,36 @@
 
 
     <div th:fragment="taskFragment" class="modal fade" id="openTaskModal" tabindex="-1" role="dialog" aria-labelledby="openTaskModalLabel" aria-hidden="true" style="color: black;">
-        <form th:action="@{'/saveTask'}" method="post">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="openTaskModalLabel" th:text="${task.titleTask}"></h5>
+                        <a  class="btn btn-primary" style="margin: auto 0; " data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                            Edit
+                        </a>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
-                        <form>
+                        <form th:action="@{'/saveTask/' + ${task.idTask}}" method="post">
                             <div class="form-group">
-                                <!--<input type="hidden" class="form-control" id="idTask" name="idTask" value="">-->
-                                <!--<input type="text" class="form-control" id="titleTask" name="titleTask" value="">-->
-                                <div th:replace="fragment/comment.html :: comment"></div>
+                                <div class="collapse" id="collapseExample">
+                                    <div class="card card-body">
+                                        <input type="text" class="form-control" name="titleTask" th:value="${task.titleTask}">
+                                        <input type="text" class="form-control" name="descriptionTask" th:value="${task.descriptionTask}">
+                                        <input type="submit" class="btn btn-primary" value="Save"/>
+                                    </div>
+                                </div>
                             </div>
                         </form>
+                        <div th:replace="fragment/comment.html :: comment"></div>
                     </div>
                     <div class="modal-footer">
                         <input type="submit" class="btn btn-success" value="Save">
                     </div>
                 </div>
             </div>
-        </form>
     </div>
 
 

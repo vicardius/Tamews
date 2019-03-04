@@ -12,6 +12,7 @@
     <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
+
 </head>
 <body style="background: #545e67; color: white;">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -36,6 +37,43 @@
         </div>
     </nav>
 
+    <button id="showAddUsersToProject" class="btn btn-success" style="margin-top: 10px; margin-left: 10px; position: absolute;">Add Users To Project</button>
+    <div class="custom-control custom-checkbox" id="addUsersToProject" style="display: none; position: absolute; left: 8px; top: 110px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); background: white; color: black; width: 176px; z-index: 100; border-radius: 4px; padding: 10px;">
+        <th:ul th:each="userToProject : ${usersToProject}">
+            <li style="list-style: none; margin-left: 24px;">
+                <input class="userToProject custom-control-input" type="checkbox" th:value="${userToProject.getIdUser()}" th:id="${userToProject.getIdUser()}" th:checked="${userToProject.getProjects().contains(foundProject)}">
+                <label class="custom-control-label" th:for="${userToProject.getIdUser()}" th:text="${userToProject.getFirstNameUser()} + ' ' + ${userToProject.getLastNameUser()}"></label>
+            </li>
+        </th:ul>
+        <input id="submitAddingUsers" class="btn btn-success" type="submit" value="Save" style="width: 100%; margin-top: 5px;" >
+    </div>
+
+
+    <script>
+        $('#submitAddingUsers').on('click', function() {
+            var $idProject = [[${foundProject.projectId}]];
+            var $addedUsersToProject = $(".userToProject:checked").map(function () {
+                return $(this).val();
+            }).get();
+            if ($addedUsersToProject.length != 0) {
+                $.ajax({
+                    type: 'GET',
+                    url: '/addUsersToProject',
+                    data: ({addedUsersToProject : $addedUsersToProject, idProject : $idProject}),
+                });
+            }
+            $("#addUsersToProject").hide();
+        });
+    </script>
+    <script>
+        $(document).ready(function() {
+            $("#showAddUsersToProject").on("click", function() {
+                $("#addUsersToProject").toggle();
+            })
+        });
+    </script>
+
+
     <h3 style="text-align: center; margin-top: 16px; margin-bottom: 36px;" th:text="${foundProject.projectTitle}"></h3>
 
     <th:block th:each="taskBarWithTasks : ${taskBarsWithTasks}">
@@ -55,20 +93,18 @@
 
 
             <div class="card-body" style="padding: 10px;">
-                <ul id="sortable1" class="connectedSortable" th:value="${taskBarWithTasks.key.idTaskBar}">
-                    <form>
-                        <div style="height: 2px;"></div>
-                    </form>
+                <ul class="sortable" th:value="${taskBarWithTasks.key.idTaskBar}" style="min-height: 370px;">
+
                     <tr th:each="task : ${taskBarWithTasks.value}">
 
-                            <li style="list-style: none; margin-left: -40px;" class="draggable-task" th:value="${task.idTask}">
+                            <li style="list-style: none; margin-left: -40px;"  th:value="${task.idTask}">
                                 <!--<a  style="color: white; text-decoration: none;">-->
                                 <!--<style>-->
                                     <!--.pointing:hover {-->
                                         <!--background-color: red !important;-->
                                     <!--}-->
                                 <!--</style>-->
-                                    <div th:onclick="'javascript:openTaskModal(' + ${task.idTask} + ');'" class="pointing card-text p-2 mb-2" style="background: #28a745; border-radius: 4px; cursor: pointer;">
+                                    <div th:onclick="'javascript:openTaskModal(' + ${task.idTask} + ');'"  class="pointing card-text p-2 mb-2" style="background: #28a745; border-radius: 4px; cursor: pointer;">
                                         <span th:text="${task.titleTask}"></span>
                                         <input type="hidden" th:value="${task.idTask}" name="idTask">
                                         <!--<a style="position: absolute; left: 220px;" th:href="@{'/projects/' + ${foundProject.projectId} + '/t/' + ${task.idTask}}"><div class="sprite-image-delete"></div></a>-->
@@ -162,7 +198,6 @@
             });
         }
     </script>
-
     <script>
         $(document).ready(function(){
             $('.eBtn').on('click', function (event) {
@@ -178,20 +213,26 @@
     </script>
     <script>
         $(document).ready(function() {
-            $("#sortable1, #sortable2").sortable({
-                connectWith: ".connectedSortable",
-                receive : function (event, ui) {
+            $(".sortable").sortable({
+                connectWith: ".sortable",
+                update : function (event, ui) {
                     var $idTask = $(ui.item).attr('value');
                     var $idTaskBar = $(this).attr('value');
+                    var $idTasksChanged = [];
+                    var $children = $(".sortable[value='" + $idTaskBar+ "']" ).sortable("refreshPositions").children();
+                    $.each($children, function() {
+                        $idTasksChanged.push($(this).attr('value'))
+                    });
                     $.ajax({
                         type: 'GET',
                         url: '/drag-task',
-                        data: ({idTask : $idTask, idTaskBar : $idTaskBar}),
+                        data: ({idTask : $idTask, idTaskBar : $idTaskBar, idTasksChanged : $idTasksChanged}),
                     });
-                }
+                },
             }).disableSelection();
         });
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
 </body>
 </html>

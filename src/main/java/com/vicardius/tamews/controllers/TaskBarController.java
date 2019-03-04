@@ -1,14 +1,10 @@
 package com.vicardius.tamews.controllers;
 
-import com.vicardius.tamews.models.Comment;
-import com.vicardius.tamews.models.Project;
-import com.vicardius.tamews.models.Task;
-import com.vicardius.tamews.models.TaskBar;
-import com.vicardius.tamews.repositories.CommentRepository;
-import com.vicardius.tamews.repositories.ProjectRepository;
-import com.vicardius.tamews.repositories.TaskBarRepository;
-import com.vicardius.tamews.repositories.TaskRepository;
+import com.vicardius.tamews.models.*;
+import com.vicardius.tamews.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class TaskBarController {
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private TaskBarRepository taskBarRepository;
@@ -30,16 +29,31 @@ public class TaskBarController {
     @Autowired
     private CommentRepository commentRepository;
 
+    public String getIdUser(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth.getName();
+    }
+
     @PostMapping("/projects/{projectId}")
     public String addTaskBar(@RequestParam(name = "titleTaskBar", required = false, defaultValue = "") String titleTaskBar,
                              @PathVariable Long projectId,
                              @RequestParam(name = "titleTask", required = false, defaultValue = "") String titleTask,
                              @RequestParam(name = "descriptionTask", required = false, defaultValue = "") String descriptionTask,
+                             @RequestParam(name = "dueDateTask", required = false, defaultValue = "") String dueDateTask,
+                             @RequestParam(name = "statusTask", required = false, defaultValue = "Active") String statusTask,
                              @RequestParam(name = "idTaskBar", required = false, defaultValue = "") Long taskBarId) {
         if (titleTaskBar.equals("") && titleTaskBar.equals("")) {
-            TaskBar taskBar = taskBarRepository.findByIdTaskBar(taskBarId);
+            User user = userRepository.findByUsername(getIdUser());
             Project project = projectRepository.findByProjectId(projectId);
-            Task task = new Task(titleTask, descriptionTask, taskBar, project);
+            TaskBar taskBar = taskBarRepository.findByIdTaskBar(taskBarId);
+            Iterable<Task> tasks = taskRepository.findByTaskBar(taskBar);
+            int inTaskbarPositionTask = 0;
+            for (Task task: tasks) {
+                if(task.getInTaskbarPositionTask() > inTaskbarPositionTask) {
+                    inTaskbarPositionTask = task.getInTaskbarPositionTask();
+                }
+            }
+            Task task = new Task(titleTask, descriptionTask, dueDateTask, statusTask, inTaskbarPositionTask + 1, user, project, taskBar);
             taskRepository.save(task);
         } else {
             Project project = projectRepository.findByProjectId(projectId);

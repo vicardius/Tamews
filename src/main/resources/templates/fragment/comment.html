@@ -6,9 +6,20 @@
 </head>
 <body>
     <div th:fragment="comment">
+        <h3 style="color: black;">Comments</h3>
+        <form th:action="@{'/addComment/' + ${task.idTask}}" method="post">
+            <textarea class="form-control" rows="3" name="comment" placeholder="Enter Your Comment"></textarea>
+            <input type="submit" class="btn btn-primary" value="Add Comment"/>
+        </form>
         <th:block th:each="comment : ${comments}">
-            <p th:text="${comment.textComment}"></p>
-            <p th:text="${comment.dateComment}"></p>
+            <div class="media">
+                <div class="media-body" style="color: black;">
+                    <h5 class="mt-0">Media heading</h5>
+                    <span th:text="${comment.textComment}"></span>
+                    <span th:text="${comment.dateComment}"></span>
+                    <span th:text="${comment.user.getUsername()}"></span>
+                </div>
+            </div>
         </th:block>
     </div>
 </body>
